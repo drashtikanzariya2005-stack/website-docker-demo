@@ -33,12 +33,11 @@ pipeline {
             }  
         }  
   
-        stage('Login to ECR') {
+      stage('Login to ECR') {
     steps {
-        sh '''
-        aws ecr get-login-password --region ap-south-1 | \
-        docker login --username AWS --password-stdin 576557632072.dkr.ecr.ap-south-1.amazonaws.com
-        '''
+        sh """
+        aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 498378078149.dkr.ecr.ap-south-1.amazonaws.com
+        """
     }
 }
   
@@ -51,21 +50,21 @@ pipeline {
             }  
         }  
   
-       stage('Deploy to EC2') {
-    steps {
-        sshagent(['ubuntu']) {
-            sh '''
-            ssh -o StrictHostKeyChecking=no ubuntu@65.0.29.9 "
-            aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 576557632072.dkr.ecr.ap-south-1.amazonaws.com &&
-            docker pull 576557632072.dkr.ecr.ap-south-1.amazonaws.com/website-docker-demo:latest &&
-            docker stop website-demo || true &&
-            docker rm website-demo || true &&
-            docker run -d --name website-demo -p 80:80 576557632072.dkr.ecr.ap-south-1.amazonaws.com/website-docker-demo:latest
-            "
-            '''
-        }
-    }
-}
+        stage('Deploy to EC2') {  
+            steps {  
+                sshagent(['deploy-ec2-key']) {  
+                    sh '''  
+                        ssh -o StrictHostKeyChecking=no ubuntu@$DEPLOY_SERVER "  
+                        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com &&  
+                        docker pull $LATEST_URI &&  
+                        docker stop website-demo || true &&  
+                        docker rm website-demo || true &&  
+                        docker run -d --name website-demo -p 80:80 $LATEST_URI  
+                        "  
+                    '''  
+                }  
+            }  
+        }  
     }  
   
     post {  
