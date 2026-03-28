@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         AWS_REGION = 'ap-south-1'
-        AWS_ACCOUNT_ID = 'YOUR_AWS_ACCOUNT_ID'
+        AWS_ACCOUNT_ID = '576557632072'
         ECR_REPO = 'website-docker-demo'
         IMAGE_TAG = 'latest'
 
@@ -11,12 +11,6 @@ pipeline {
     }
 
     stages {
-
-        stage('Clone Code') {
-            steps {
-                git 'https://github.com/drashtikanzariya2005-stack/website-docker-demo.git'
-            }
-        }
 
         stage('Build Docker Image') {
             steps {
